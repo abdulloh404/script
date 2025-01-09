@@ -51,8 +51,3 @@ while true; do
     echo "Invalid key. Only Control+R and Control+C are allowed."
   fi
 done
-
-
-
-//เขียนข้อความแสดงการ  run ให้ดีๆหน่อยๆ status เป็นยังไง และ nginx ด้วย 
-เข้าใจไหม รันเสร็จให้แสดง log nginx 
