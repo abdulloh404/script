@@ -1,53 +1,86 @@
 #!/bin/bash
 
+LOG_FILE="/tmp/service_status.log"
+
+# ฟังก์ชันตรวจสอบสถานะ
+check_service_status() {
+  local service=$1
+  local port=$2
+  local status=$(sudo systemctl is-active $service)
+  local pid=$(pgrep -x "$service")
+  local log_path="/var/log/$service/access.log"
+
+  if [[ $status == "active" ]]; then
+    echo -e "  🟢 $service Started"
+    echo -e "     Status: active"
+    echo -e "     Port: $port"
+    echo -e "     Logs: $log_path"
+  else
+    echo -e "  🔴 $service Stopped"
+    echo -e "     Status: inactive"
+  fi
+}
+
+# ฟังก์ชันเริ่มต้นบริการ
 start_services() {
-  echo "Starting Nginx..."
+  echo "Executing Command: sudo systemctl start services"
+  echo -e "  🔧 Processing...\n"
+
   sudo systemctl start nginx
-  echo "Nginx Started: $(sudo systemctl is-active nginx)"
-  
-  echo "Starting MySQL..."
   sudo systemctl start mysql
-  echo "MySQL Started: $(sudo systemctl is-active mysql)"
-  
-  echo "Starting PHP-FPM..."
-  sudo systemctl start php8.3-fpm
-  echo "PHP-FPM Started: $(sudo systemctl is-active php8.3-fpm)"
+  sudo systemctl start php8.4-fpm
+
+  echo -e "info: Systemd[14]"
+  check_service_status "nginx" "http://localhost:8080"
+  check_service_status "mysql" "3306"
+  check_service_status "php8.4-fpm" "Unknown"
+
+  echo -e "info: Systemd[0]"
+  echo -e "     Press Ctrl+C to shut down monitoring."
+  echo -e "     Press Ctrl+R to restart monitoring."
+  echo -e "     Press Ctrl+L to log monitoring."
 }
 
-# ฟังก์ชันหยุดบริการ
-stop_services() {
-  echo "Stopping Nginx..."
-  sudo systemctl stop nginx
-  echo "Nginx Stopped: $(sudo systemctl is-active nginx)"
-  
-  echo "Stopping MySQL..."
-  sudo systemctl stop mysql
-  echo "MySQL Stopped: $(sudo systemctl is-active mysql)"
-  
-  echo "Stopping PHP-FPM..."
-  sudo systemctl stop php8.3-fpm
-  echo "PHP-FPM Stopped: $(sudo systemctl is-active php8.3-fpm)"
-}
-
+# ฟังก์ชันรีสตาร์ทบริการ
 restart_services() {
-  stop_services
-  start_services
+  echo "Executing Command: sudo systemctl restart services"
+  echo -e "  🔧 Restarting...\n"
+
+  sudo systemctl restart nginx
+  sudo systemctl restart mysql
+  sudo systemctl restart php8.4-fpm
+
+  echo -e "info: Systemd[14]"
+  check_service_status "nginx" "http://localhost:8080"
+  check_service_status "mysql" "3306"
+  check_service_status "php8.4-fpm" "Unknown"
+
+  echo -e "info: Systemd[0]"
+  echo -e "     Press Ctrl+C to shut down monitoring."
+  echo -e "     Press Ctrl+R to restart monitoring."
+  echo -e "     Press Ctrl+L to log monitoring."
 }
 
+# ฟังก์ชันแสดง Log
+log_services() {
+  echo -e "\ninfo: Logs"
+  tail -n 10 /var/log/nginx/access.log
+  tail -n 10 /var/log/mysql/error.log
+  tail -n 10 /var/log/php8.4-fpm.log
+}
+
+# ฟังก์ชันเริ่มต้นการทำงาน
 start_services
 
+# รอการกดปุ่ม
 while true; do
-  echo "Press Control+R to restart services, or Control+C to stop and exit."
-
-  read -rsn1 key # รอการกดปุ่ม
-  if [[ $key == $'\x12' ]]; then # ตรวจจับ Control+R (Restart)
-    echo "Restarting services..."
+  read -rsn1 key
+  if [[ $key == $'\x12' ]]; then # Control+R
     restart_services
-  elif [[ $key == $'\x03' ]]; then # ตรวจจับ Control+C (Stop and Exit)
-    echo "Stopping services and exiting..."
-    stop_services
+  elif [[ $key == $'\x03' ]]; then # Control+C
+    echo -e "\nStopping services and exiting..."
     exit 0
-  else
-    echo "Invalid key. Only Control+R and Control+C are allowed."
+  elif [[ $key == $'\x0C' ]]; then # Control+L
+    log_services
   fi
 done
