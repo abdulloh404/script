@@ -28,12 +28,12 @@ start_services() {
 
   sudo systemctl start nginx
   sudo systemctl start mysql
-  sudo systemctl start php8.4-fpm
+  sudo systemctl start php8.3-fpm
 
   echo -e "info: Systemd[14]"
   check_service_status "nginx" "http://localhost:8080"
   check_service_status "mysql" "3306"
-  check_service_status "php8.4-fpm" "Unknown"
+  check_service_status "php8.3-fpm" "9000"
 
   echo -e "info: Systemd[0]"
   echo -e "     Press Ctrl+C to shut down monitoring."
@@ -48,12 +48,12 @@ restart_services() {
 
   sudo systemctl restart nginx
   sudo systemctl restart mysql
-  sudo systemctl restart php8.4-fpm
+  sudo systemctl restart php8.3-fpm
 
   echo -e "info: Systemd[14]"
   check_service_status "nginx" "http://localhost:8080"
   check_service_status "mysql" "3306"
-  check_service_status "php8.4-fpm" "Unknown"
+  check_service_status "php8.3-fpm" "Unknown"
 
   echo -e "info: Systemd[0]"
   echo -e "     Press Ctrl+C to shut down monitoring."
@@ -66,7 +66,7 @@ log_services() {
   echo -e "\ninfo: Logs"
   tail -n 10 /var/log/nginx/access.log
   tail -n 10 /var/log/mysql/error.log
-  tail -n 10 /var/log/php8.4-fpm.log
+  tail -n 10 /var/log/php8.3-fpm.log
 }
 
 # ฟังก์ชันเริ่มต้นการทำงาน
