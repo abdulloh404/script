@@ -1,0 +1,2 @@
+nmcli radio wifi on
+nmcli device wifi connect "Abdulloh Mukem" password "190980231"
