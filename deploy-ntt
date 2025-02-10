@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sshpass -p 'CocoaD12345' ssh ubuntu@43.229.135.203 << EOF
+  cd ~/reverse-proxy-system/backend/ntt
+  docker compose down
+  docker compose up -d --build
+EOF
