@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# เช็คว่าผู้ใช้ใส่โหมด governor หรือไม่
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 [performance|powersave]"
+    exit 1
+fi
+
+# ตั้งค่า governor ให้ทุก Core
+for core in $(seq 0 $(($(nproc --all) - 1))); do
+    sudo cpufreq-set -c $core -g "$1"
+done
+
+# แสดงผลลัพธ์หลังการตั้งค่า
+echo "CPU Governor ตั้งค่าเป็น '$1' สำหรับทุก Core แล้ว"
+cpufreqctl --governor
